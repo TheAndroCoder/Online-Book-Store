@@ -1,0 +1,26 @@
+{
+  "name": "online-book",
+  "version": "1.0.0",
+  "description": "Online Book Store",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app",
+    "start":"node app"
+  },
+  "keywords": [
+    "Book",
+    "Store"
+  ],
+  "author": "Anushikha",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "express-formidable": "^1.2.0",
+    "express-myconnection": "^1.0.4",
+    "fs": "0.0.1-security",
+    "moment": "^2.27.0",
+    "mysql": "^2.18.1",
+    "path": "^0.12.7"
+  }
+}

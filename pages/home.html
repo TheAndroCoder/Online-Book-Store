@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <title>Book Store | Home</title>
+    <style>
+        html,body{
+            margin:0;
+            padding:0;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .header{
+            width:100vw;
+            height:50vh;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.6),rgba(0,0,0,0.6)), url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fblogs.lse.ac.uk%2Flsereviewofbooks%2Ffiles%2F2016%2F02%2FBooks-for-Survey.jpg&f=1&nofb=1');
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        #bloom-box{
+            width:60vw;
+            height:300px;
+            background-color: #fff;
+            opacity: 0.3;
+            
+        }
+        #featured-section{
+            padding-top:50px;
+            padding-bottom:50px;
+        }
+        .book-box{
+            width:200px;
+            height:270px;
+            border-radius: 5px;
+            margin:5px;
+            overflow: hidden;
+            transition: box-shadow 0.3s;
+        }
+        .book-box:hover{
+            box-shadow: 2px 2px 5px black;
+            cursor: pointer;
+        }
+        .book-box>button{
+            margin:10px;
+            margin-left:35px;
+            margin-top: 200px;
+        }
+        #top-rated-section{
+            padding-top:50px;
+            padding-bottom:50px;
+        }
+        #all-section{
+            padding-top:50px;
+            padding-bottom:50px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">Book Store</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+                <p class="nav-link m-0" id="welcome-text"></p>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="logout-btn" onclick="return logout()" href="/login">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="cart" onclick="return cart()" href="/cart">Cart(0)</a>
+            </li>
+          </ul>
+        </div>
+    </nav>
+
+    <div class="header">
+        <p class="display-3 text-center text-white font-weight-bold pt-4">Book Store</p>
+        <p class="display-4 text-center text-white"><q>You get the best sellers here at the cheapest price</q></p>
+    </div>
+
+    <section id="featured-section">
+        <div class="container">
+            <h2 class="mb-4">Best Seller Books</h2>
+            <div class="d-flex flex-wrap" id="best-seller">
+                <p class="alert alert-info loading-alert">Please wait while loading...</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="top-rated-section">
+        <div class="container">
+            <h2 class="mb-4">Top Rated Books</h2>
+            <div class="d-flex flex-wrap" id="top-rated">
+                <p class="alert alert-info loading-alert">Please wait while loading...</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="all-section">
+        <div class="container">
+            <h2 class="mb-4">Available Books</h2>
+            <div class="d-flex flex-wrap" id="available">
+                <p class="alert alert-info loading-alert">Please wait while loading...</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer bg-info">
+        <div class="footer-copyright text-white text-center py-3">© 2020 Copyright:
+            <h5 class="text-white">Developed by Anushikha</h5>
+        </div>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script>
+        var books=[];
+        $(()=>{
+            if(localStorage.getItem("USERID")!=null){
+                $("#logout-btn").text('Logout');
+                $("#welcome-text").text('Welcome '+localStorage.getItem('EMAIL'))
+            }else{
+                $("#logout-btn").text('Login');
+            }
+            if(localStorage.getItem('CART')!=null){
+                var arr = JSON.parse(localStorage.getItem('CART'));
+                $('#cart').text('Cart('+arr.length+')');
+            }
+
+            fetchBooks();
+        });
+        function logout(){
+            localStorage.clear();
+            return true;
+        }
+
+        function fetchBooks(){
+            fetch('/books',{
+                method: 'GET'
+            }).then(response =>{$(".loading-alert").hide();return response.json()}).then(data=>{
+                if(data.success){
+                    
+                    for(var i=0;i<data.result.length;i++){
+                        books.push(data.result[i]);
+                    }
+                    localStorage.setItem('BOOKS',JSON.stringify(books));
+                    populateData();
+                }else{
+                    alert('DB Connection Failed ! Press ok to reload')
+                    window.location.reload();
+                }
+            })
+        }
+        function populateData(){
+            for(var i=0;i<books.length;i++){
+                $('#available').append(getBooksHtml(books[i]));
+            }
+            for(var i=0;i<5;i++){
+                var rand1 = Math.floor(Math.random()*books.length);
+                $("#top-rated").append(getBooksHtml(books[rand1]));
+                var rand2 = Math.floor(Math.random()*books.length);
+                $("#best-seller").append(getBooksHtml(books[rand2]));
+            }
+        }
+        function getBooksHtml(book){
+            return '<div class="book-box"><button class="btn btn-info" style="position:absolute" onclick="addToCart('+book.bookid+')">ADD TO CART</button><img src="'+book.bookimage+'" width="100%" height="100%"></div>'
+
+        }
+
+        function addToCart(bkid){
+            //console.log(books)
+            if(localStorage.getItem('CART')!=null){
+                var arr = JSON.parse(localStorage.getItem('CART'));
+                arr.push(books.filter(book=>book.bookid==bkid)[0]);
+                localStorage.setItem('CART',JSON.stringify(arr));
+            }else{
+                localStorage.setItem('CART',JSON.stringify(books.filter(book=>book.bookid==bkid)));
+            }
+            $('#cart').text('Cart('+JSON.parse(localStorage.getItem('CART')).length+')');
+        }
+        function cart(){
+            if(localStorage.getItem('CART')!=null){
+                return true;
+            }else{
+                alert('Cart is Empty')
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>
